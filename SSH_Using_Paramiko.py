@@ -8,15 +8,15 @@ import paramiko
 import os
 import sys
 import time
+import getpass
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from conf import ssh_conf
 import socket
 
 class SSH:
     "Class to connect to remote server"
     
-    def __init__(self, Host, User, Password, Timeout):
+    def __init__(self, Host, User, Password, Timeout, Port):
         self.ssh_output = None
         self.ssh_error = None
         self.client = None
@@ -24,6 +24,7 @@ class SSH:
         self.username = User
         self.password = Password
         self.timeout = float(Timeout)
+        self.port = Port
         
     def connect(self):
         "Login to the remote server"
@@ -79,6 +80,8 @@ class SSH:
                     result_flag = False
                 else:
                     print("Command execution completed successfully", command)
+                    print(str(self.ssh_output)) # print the result of executing the command
+                
                 self.client.close()
                 
             else:
@@ -137,8 +140,13 @@ class SSH:
             self.client.close()
         
         return result_flag
-    
-ssh_obj = SSH('login.cpp.edu', 'ggkeil', 'NoRespect18', 20)
+
+host = input("Enter host name: ")
+port = input("Port: ")
+user = input("login as: ")
+password = getpass.getpass(prompt = user + "@" + host + "'s password: ") # only supported when executing in command prompt
+
+ssh_obj = SSH(str(host), str(user), str(password), 20, int(port))
 ssh_obj.connect()
 command = input("Enter a command: ")
 ssh_obj.execute_command(command)
